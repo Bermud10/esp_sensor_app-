@@ -30,11 +30,20 @@ class SensorScreen extends StatefulWidget {
 }
 
 class SensorScreenState extends State<SensorScreen> {
-
-    String _temperature = 'Нажмите кнопку для обновления';
+    String _info = '';
+    String _temperature = '***';
     String _location = '';
     String _unit = '';
     bool isLoading = false;
+
+   String getlocation(String location) {
+
+      if(location == "street"){
+        return "Температура улицы";
+      }
+
+      return "Температура";
+    }
 
     Future<void> getTemperature() async {
       setState(() {
@@ -56,13 +65,13 @@ class SensorScreenState extends State<SensorScreen> {
           });
         }else{
           setState(() {
-            _temperature = "Ошибка: ${response.statusCode}";
+            _info = "Ошибка: ${response.statusCode}";
           });
         }
       }
       catch(e){
         setState(() {
-          _temperature = "Ошибка подключения";
+          _info = "Ошибка подключения";
         });
         print("$e");
       }
@@ -78,39 +87,45 @@ class SensorScreenState extends State<SensorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Датчик температуры'),
+        title: const Text('Термометр'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_location.isNotEmpty)
+            if (_location.isNotEmpty) ...[
               Text(
-                _location.toUpperCase(),
+                getlocation(_location),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ],
             Text(
-              _temperature == 'Нажмите кнопку для обновления'
+              _temperature == '***'
                   ? _temperature
                   : '$_temperature $_unit',
               style: Theme.of(context).textTheme.displayLarge,
             ),
             const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: isLoading ? null : getTemperature,
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh),
-              label: Text(isLoading ? 'Загрузка...' : 'Обновить'),
-            ),
           ],
+          
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: FloatingActionButton.extended(
+                    onPressed: isLoading ? null : getTemperature,
+                    label: Text(isLoading ? 'Загрузка...' : 'Обновить'),
+                    icon: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+                  ),
+      ),
     );
+    
   }
 }
