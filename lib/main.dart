@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ru', null);
   runApp(const MyApp());
 }
 
@@ -30,20 +35,59 @@ class SensorScreen extends StatefulWidget {
 }
 
 class SensorScreenState extends State<SensorScreen> {
-    String _info = '';
-    String _temperature = '***';
-    String _location = '';
-    String _unit = '';
-    bool isLoading = false;
+  String _info = '';
+  String _temperature = '***';
+  String _location = '';
+  String _unit = '';
+  DateTime? _lastUpdated; 
+  bool isLoading = false;
+
+   Future<void> _loadCachedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedTemp = prefs.getString('temperature');
+    final cachedLocation = prefs.getString('location');
+    final cachedUnit = prefs.getString('unit');
+    final cachedTime = prefs.getString('lastUpdated');
+
+    if (cachedTemp != null && mounted) {
+      setState(() {
+        _temperature = cachedTemp;
+        _location = cachedLocation ?? '';
+        _unit = cachedUnit ?? '';
+        _lastUpdated = cachedTime != null ? DateTime.tryParse(cachedTime) : null;
+      });
+    }
+  }
+
+  // Сохранение данных в SharedPreferences
+  Future<void> _saveToCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('temperature', _temperature);
+    await prefs.setString('location', _location);
+    await prefs.setString('unit', _unit);
+    if (_lastUpdated != null) {
+      await prefs.setString('lastUpdated', _lastUpdated!.toIso8601String());
+    }
+  }
 
    String getlocation(String location) {
 
-      if(location == "street"){
-        return "Температура улицы";
-      }
-
-      return "Температура";
+    if(location == "street"){
+      return "Температура улицы";
     }
+
+    return "Температура";
+  }
+
+  String _formatTime(DateTime time) {
+    return DateFormat('d MMM  HH:mm', "ru").format(time);
+  }
+
+   @override
+  void initState() {
+    super.initState();
+    _loadCachedData(); // ← загрузка последнего измерения при старте
+  }
 
     Future<void> getTemperature() async {
       setState(() {
@@ -62,7 +106,10 @@ class SensorScreenState extends State<SensorScreen> {
             _temperature = data['temperature'].toString();
             _location = data['location'];
             _unit = data['unit'];
+            _lastUpdated = DateTime.now();
           });
+           await _saveToCache();
+           _info = "";
         }else{
           setState(() {
             _info = "Ошибка: ${response.statusCode}";
@@ -106,7 +153,25 @@ class SensorScreenState extends State<SensorScreen> {
                   : '$_temperature $_unit',
               style: Theme.of(context).textTheme.displayLarge,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+
+            if (_lastUpdated != null) ... [
+              Text(
+                'Обновлено: ${_formatTime(_lastUpdated!)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+
+            if (_info.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                _info,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+        
           ],
           
         ),
