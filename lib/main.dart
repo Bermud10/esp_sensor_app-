@@ -1,37 +1,22 @@
-
-import 'package:esp_sensor_app/screens/first_screen.dart';
+import 'package:esp_sensor_app/widgets/temperature_display.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
-//https://docs.flutter.dev/install/archive
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('ru', null);
+void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ESP street sensor',
+      title: 'MQTT Датчики',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
-      home: const FirstScreen(),
+      home: const SensorDashboard(),
     );
   }
 }
-
-class FirstScreen extends StatefulWidget {
-  const FirstScreen({super.key});
-
-  @override
-  FirstScreenState createState() => FirstScreenState();
-}
-
-
