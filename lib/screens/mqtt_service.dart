@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'dart:convert';
 
 // Модель данных для отображения
 class SensorReading {
@@ -114,12 +115,62 @@ class MqttService {
       processNumericData(_lastStreetTemp, (val) => _lastStreetTemp = val, _streetTempController, '°C');
     } else if (topic == 'user_1d18b030/balcony/temp') {
       processNumericData(_lastBalconyTemp, (val) => _lastBalconyTemp = val, _balconyTempController, '°C');
-    } else if (topic == 'user_1d18b030/room/temp') {
-      processNumericData(_lastRoomTemp, (val) => _lastRoomTemp = val, _roomTempController, '°C');
-    } else if (topic == 'user_1d18b030/room/humidity') {
-      processNumericData(_lastRoomHumidity, (val) => _lastRoomHumidity = val, _roomHumidityController, '%');
-    } else if (topic == 'user_1d18b030/room/pressure') {
-      processNumericData(_lastRoomPressure, (val) => _lastRoomPressure = val, _roomPressureController, 'гПа');
+    } else if (topic == 'user_1d18b030/room/data') {
+      try {
+        final data = jsonDecode(payload);
+        final timestamp = data['ts'] as int;
+        final measurementTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000, isUtc: true);
+    
+        // Температура
+        double? diff;
+        bool isIncreasing = true;
+        if (_lastRoomTemp != null) {
+          diff = data['temp'] - _lastRoomTemp;
+          isIncreasing = diff! >= 0;
+        }
+        _lastRoomTemp = data['temp'];
+    
+        _roomTempController.add(SensorReading(
+          displayValue: '${data['temp'].toStringAsFixed(1)} °C',
+          timestamp: measurementTime, //  Реальное время измерения!
+          difference: diff?.abs(),
+          isIncreasing: isIncreasing,
+        ));
+    
+        // Влажность
+        diff = null;
+        if (_lastRoomHumidity != null) {
+          diff = data['hum'] - _lastRoomHumidity;
+          isIncreasing = diff! >= 0;
+        }
+        _lastRoomHumidity = data['hum'];
+    
+        _roomHumidityController.add(SensorReading(
+          displayValue: '${data['hum'].toStringAsFixed(1)} %',
+          timestamp: measurementTime,
+          difference: diff?.abs(),
+          isIncreasing: isIncreasing,
+        ));
+    
+        // Давление
+        diff = null;
+        if (_lastRoomPressure != null) {
+          diff = data['press'] - _lastRoomPressure;
+          isIncreasing = diff! >= 0;
+        }
+        _lastRoomPressure = data['press'];
+        
+        _roomPressureController.add(SensorReading(
+          displayValue: '${data['press'].toStringAsFixed(1)} гПа',
+          timestamp: measurementTime,
+          difference: diff?.abs(),
+          isIncreasing: isIncreasing,
+        ));
+    
+        print('📩 Получено: temp=${data['temp']}, hum=${data['hum']}, press=${data['press']}, ts=$measurementTime');
+      } catch (e) {
+        print(' Ошибка парсинга JSON: $e');
+      }
     }
   }
 

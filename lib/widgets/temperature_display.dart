@@ -63,9 +63,9 @@ class _SensorDashboardState extends State<SensorDashboard> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildSensorCard('Улица', _mqttService.streetTempStream, Icons.ac_unit, Colors.blue),
-                  const SizedBox(height: 12),
-                  _buildSensorCard('Балкон', _mqttService.balconyTempStream, Icons.balcony, Colors.cyan),
+                  // _buildSensorCard('Улица', _mqttService.streetTempStream, Icons.ac_unit, Colors.blue),
+                  // const SizedBox(height: 12),
+                  // _buildSensorCard('Балкон', _mqttService.balconyTempStream, Icons.balcony, Colors.cyan),
                   const SizedBox(height: 12),
                   _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream, Icons.home, Colors.orange),
                   const SizedBox(height: 12),
@@ -90,11 +90,13 @@ class _SensorDashboardState extends State<SensorDashboard> {
         initialData: SensorReading(displayValue: '--', timestamp: DateTime.now()),
         builder: (context, snapshot) {
           final data = snapshot.data!;
+
+          final localTime = data.timestamp.toLocal();
           
           // Форматируем время (ЧЧ:ММ:СС)
-          final timeStr = "${data.timestamp.hour.toString().padLeft(2, '0')}:"
-                          "${data.timestamp.minute.toString().padLeft(2, '0')}:"
-                          "${data.timestamp.second.toString().padLeft(2, '0')}";
+          final timeStr = "${localTime.hour.toString().padLeft(2, '0')}:"
+                          "${localTime.minute.toString().padLeft(2, '0')}:"
+                          "${localTime.second.toString().padLeft(2, '0')}";
 
           // Создаем виджет разницы температур (если это не первое значение)
           Widget? diffWidget;
@@ -124,15 +126,40 @@ class _SensorDashboardState extends State<SensorDashboard> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (diffWidget != null) ...[
-                  const SizedBox(height: 4),
-                  diffWidget,
-                ],
+              if (diffWidget != null) ...[
                 const SizedBox(height: 4),
-                Text(
-                  'Обновлено: $timeStr',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
+                diffWidget,
+              ],
+               const SizedBox(height: 4),
+              // ⭐ Показываем время измерения
+              Text(
+                'Измерено: $timeStr',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              // ⭐ Показываем "возраст" данных
+              Builder(
+                builder: (context) {
+                  final age = DateTime.now().difference(data.timestamp);
+                  String ageText;
+                  if (age.inSeconds < 60) {
+                    ageText = '${age.inSeconds} сек. назад';
+                  } else if (age.inMinutes < 60) {
+                    ageText = '${age.inMinutes} мин. назад';
+                  } else {
+                    ageText = '${age.inHours} ч. назад';
+                  }
+                  
+                  final isStale = age.inMinutes > 5;
+                  return Text(
+                    '🕐 $ageText',
+                    style: TextStyle(
+                      fontSize: 12, 
+                      color: isStale ? Colors.red : Colors.green,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
+              ),
               ],
             ),
             trailing: Text(
