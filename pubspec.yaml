@@ -33,6 +33,7 @@ flutter_launcher_icons:
 
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
+  adaptive_icon_foreground_inset: 25
 
 # The following section is specific to Flutter packages.
 flutter:

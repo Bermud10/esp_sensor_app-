@@ -1,5 +1,6 @@
-import 'package:esp_sensor_app/screens/first_screen.dart';
+import 'package:esp_sensor_app/screens/mqtt_service.dart';
 import 'package:flutter/material.dart';
+
 
 class SensorDashboard extends StatefulWidget {
   const SensorDashboard({super.key});
@@ -59,32 +60,20 @@ class _SensorDashboardState extends State<SensorDashboard> {
             const SizedBox(height: 20),
             
             // Карточки датчиков
-            _buildSensorCard(
-              'Улица',
-              _mqttService.streetTempStream,
-              Icons.ac_unit,
-              Colors.blue,
-            ),
-            const SizedBox(height: 12),
-            _buildSensorCard(
-              'Балкон',
-              _mqttService.balconyTempStream,
-              Icons.balcony,
-              Colors.cyan,
-            ),
-            const SizedBox(height: 12),
-            _buildSensorCard(
-              'Комната (Темп.)',
-              _mqttService.roomTempStream,
-              Icons.home,
-              Colors.orange,
-            ),
-            const SizedBox(height: 12),
-            _buildSensorCard(
-              'Комната (Влажность)',
-              _mqttService.roomHumidityStream,
-              Icons.water_drop,
-              Colors.teal,
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildSensorCard('Улица', _mqttService.streetTempStream, Icons.ac_unit, Colors.blue),
+                  const SizedBox(height: 12),
+                  _buildSensorCard('Балкон', _mqttService.balconyTempStream, Icons.balcony, Colors.cyan),
+                  const SizedBox(height: 12),
+                  _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream, Icons.home, Colors.orange),
+                  const SizedBox(height: 12),
+                  _buildSensorCard('Комната (Влажность)', _mqttService.roomHumidityStream, Icons.water_drop, Colors.teal),
+                  const SizedBox(height: 12),
+                  _buildSensorCard('Комната (Давление)', _mqttService.roomPressureStream, Icons.compress, Colors.purple),
+                ],
+              ),
             ),
           ],
         ),
@@ -92,23 +81,63 @@ class _SensorDashboardState extends State<SensorDashboard> {
     );
   }
 
-  // Виджет карточки датчика со StreamBuilder
-  Widget _buildSensorCard(String title, Stream<String> dataStream, IconData icon, Color color) {
+  Widget _buildSensorCard(String title, Stream<SensorReading> dataStream, IconData icon, Color color) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: StreamBuilder<String>(
+      child: StreamBuilder<SensorReading>(
         stream: dataStream,
-        initialData: '--',
+        initialData: SensorReading(displayValue: '--', timestamp: DateTime.now()),
         builder: (context, snapshot) {
-          final value = snapshot.data ?? '--';
+          final data = snapshot.data!;
+          
+          // Форматируем время (ЧЧ:ММ:СС)
+          final timeStr = "${data.timestamp.hour.toString().padLeft(2, '0')}:"
+                          "${data.timestamp.minute.toString().padLeft(2, '0')}:"
+                          "${data.timestamp.second.toString().padLeft(2, '0')}";
+
+          // Создаем виджет разницы температур (если это не первое значение)
+          Widget? diffWidget;
+          if (data.difference != null) {
+            final diffVal = data.difference!.toStringAsFixed(1);
+            final arrowIcon = data.isIncreasing ? Icons.arrow_upward : Icons.arrow_downward;
+            // Красный если растет, синий если падает
+            final diffColor = data.isIncreasing ? Colors.red.shade700 : Colors.blue.shade700;
+
+            diffWidget = Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(arrowIcon, size: 20, color: diffColor),
+                const SizedBox(width: 4),
+                Text(
+                  '$diffVal',
+                  style: TextStyle(fontSize: 16, color: diffColor, fontWeight: FontWeight.bold),
+                ),
+              ],
+            );
+          }
+
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             leading: Icon(icon, size: 40, color: color),
-            title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+            title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (diffWidget != null) ...[
+                  const SizedBox(height: 4),
+                  diffWidget,
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  'Обновлено: $timeStr',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
             trailing: Text(
-              value,
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color),
+              data.displayValue,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color),
             ),
           );
         },
