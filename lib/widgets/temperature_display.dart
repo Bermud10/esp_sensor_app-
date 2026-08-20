@@ -9,35 +9,19 @@ class SensorDashboard extends StatefulWidget {
   State<SensorDashboard> createState() => _SensorDashboardState();
 }
 
-class _SensorDashboardState extends State<SensorDashboard> with WidgetsBindingObserver {
+class _SensorDashboardState extends State<SensorDashboard> {
   final MqttService _mqttService = MqttService();
 
   @override
   void initState() {
     super.initState();
     _mqttService.connect();
-    
-    // Регистрируемся как наблюдатель за жизненным циклом приложения
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    // Удаляем наблюдатель при закрытии приложения
-    WidgetsBinding.instance.removeObserver(this);
     _mqttService.dispose();
     super.dispose();
-  }
-
-  // Автоматически срабатывает при блокировке/разблокировке экрана
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    
-    if (state == AppLifecycleState.resumed) {
-      print('📱 Приложение активно, проверяем соединение...');
-      _mqttService.appLifecycleChanged(state);
-    }
   }
 
   @override
@@ -46,44 +30,29 @@ class _SensorDashboardState extends State<SensorDashboard> with WidgetsBindingOb
       appBar: AppBar(
         title: const Text('Мониторинг датчиков'),
         backgroundColor: Colors.blue,
-        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Статус подключения (просто текст, без кнопок)
+            // Статус подключения
             StreamBuilder<String>(
               stream: _mqttService.statusStream,
-              initialData: 'Подключение...',
+              initialData: 'Отключено',
               builder: (context, snapshot) {
-                final status = snapshot.data ?? 'Подключение...';
-                final isConnected = status.contains('✅');
-                
+                final status = snapshot.data ?? 'Отключено';
                 return Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isConnected ? Colors.green.shade50 : Colors.orange.shade50,
+                    color: status.contains('✅') ? Colors.green.shade50 : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isConnected ? Colors.green : Colors.orange,
-                    ),
+                    border: Border.all(color: status.contains('✅') ? Colors.green : Colors.red),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isConnected ? Icons.check_circle : Icons.sync,
-                        color: isConnected ? Colors.green : Colors.orange,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Статус: $status',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Статус сети: $status',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );
               },
@@ -97,7 +66,7 @@ class _SensorDashboardState extends State<SensorDashboard> with WidgetsBindingOb
                   // _buildSensorCard('Улица', _mqttService.streetTempStream, Icons.ac_unit, Colors.blue),
                   // const SizedBox(height: 12),
                   // _buildSensorCard('Балкон', _mqttService.balconyTempStream, Icons.balcony, Colors.cyan),
-                  // const SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream, Icons.home, Colors.orange),
                   const SizedBox(height: 12),
                   _buildSensorCard('Комната (Влажность)', _mqttService.roomHumidityStream, Icons.water_drop, Colors.teal),
@@ -121,16 +90,20 @@ class _SensorDashboardState extends State<SensorDashboard> with WidgetsBindingOb
         initialData: SensorReading(displayValue: '--', timestamp: DateTime.now()),
         builder: (context, snapshot) {
           final data = snapshot.data!;
+
+          final localTime = data.timestamp.toLocal();
           
           // Форматируем время (ЧЧ:ММ:СС)
           final timeStr = "${localTime.hour.toString().padLeft(2, '0')}:"
                           "${localTime.minute.toString().padLeft(2, '0')}:"
                           "${localTime.second.toString().padLeft(2, '0')}";
 
+          // Создаем виджет разницы температур (если это не первое значение)
           Widget? diffWidget;
           if (data.difference != null) {
             final diffVal = data.difference!.toStringAsFixed(1);
             final arrowIcon = data.isIncreasing ? Icons.arrow_upward : Icons.arrow_downward;
+            // Красный если растет, синий если падает
             final diffColor = data.isIncreasing ? Colors.red.shade700 : Colors.blue.shade700;
 
             diffWidget = Row(

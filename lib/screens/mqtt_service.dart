@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert'; // ⭐ Добавлено для парсинга JSON
-import 'package:flutter/widgets.dart'; // ⭐ Добавлено для AppLifecycleState
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'dart:convert';
@@ -29,9 +27,8 @@ class MqttService {
   double? _lastBalconyTemp;
   double? _lastRoomHumidity;
   double? _lastRoomPressure;
-  bool _isConnecting = false;
 
-  // Потоки передают объекты SensorReading
+  // ⭐ Теперь потоки передают объекты SensorReading, а не просто String
   final _streetTempController = StreamController<SensorReading>.broadcast();
   final _balconyTempController = StreamController<SensorReading>.broadcast();
   final _roomTempController = StreamController<SensorReading>.broadcast();
@@ -54,7 +51,7 @@ class MqttService {
     _client!.onDisconnected = _onDisconnected;
     _client!.onConnected = _onConnected;
     _client!.onSubscribed = _onSubscribed;
-    _client!.logging(on: false);
+    _client!.logging(on: false); // Отключаем спам в консоль для чистоты
 
     final connMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
@@ -87,66 +84,32 @@ class MqttService {
     }
   }
 
-  Future<void> reconnect() async {
-    if (_isConnecting) {
-      print('⏳ Уже идет подключение, ждем...');
-      return;
-    }
-
-    _isConnecting = true;
-    _statusController.add('Переподключение...');
-
-    if (_client != null && _client!.connectionStatus?.state == MqttConnectionState.connected) {
-      _client!.disconnect();
-    }
-
-    await Future.delayed(const Duration(seconds: 1));
-    await connect();
-    _isConnecting = false;
-  }
-
-  void appLifecycleChanged(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      print('📱 Приложение активно, проверяем соединение...');
-      if (_client == null || _client!.connectionStatus?.state != MqttConnectionState.connected) {
-        print('Соединение потеряно, переподключаемся...');
-        reconnect();
-      }
-    }
-  }
-
   void _handleMessage(String topic, String payload) {
-    try {
-      // ⭐ Пытаемся распарсить JSON (формат от ESP: {"temp":25.9,"hum":50.0,"press":974.0,"ts":1700000000})
-      final data = jsonDecode(payload);
-      
-      // Получаем время от ESP и переводим его в локальное время телефона (Екатеринбург)
-      final timestamp = data['ts'] as int;
-      final measurementTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000, isUtc: true).toLocal();
+    final now = DateTime.now();
+    double? diff;
+    bool isIncreasing = true;
 
-      // Вспомогательная функция для обновления данных
-      void processMetric(
-        double newVal, 
-        double? lastVal, 
-        Function(double?) setLastVal, 
-        StreamController<SensorReading> controller, 
-        String unit
-      ) {
-        double? diff;
-        bool isIncreasing = true;
-        if (lastVal != null) {
-          diff = newVal - lastVal;
-          isIncreasing = diff >= 0;
-        }
-        setLastVal(newVal);
-        
-        controller.add(SensorReading(
-          displayValue: '${newVal.toStringAsFixed(1)} $unit',
-          timestamp: measurementTime, // ⭐ Используем время от ESP, а не текущее время телефона!
-          difference: diff?.abs(),
-          isIncreasing: isIncreasing,
-        ));
+    // Вспомогательная функция для обработки числовых данных
+    void processNumericData(
+      double? lastValue, 
+      Function(double?) setLastValue, 
+      StreamController<SensorReading> controller, 
+      String unit
+    ) {
+      double newVal = double.tryParse(payload) ?? 0.0;
+      if (lastValue != null) {
+        diff = newVal - lastValue;
+        isIncreasing = diff! >= 0;
       }
+      setLastValue(newVal);
+      
+      controller.add(SensorReading(
+        displayValue: '${newVal.toStringAsFixed(1)} $unit',
+        timestamp: now,
+        difference: diff?.abs(), // Передаем модуль числа для отображения
+        isIncreasing: isIncreasing,
+      ));
+    }
 
     if (topic == 'user_1d18b030/street/temp') {
       processNumericData(_lastStreetTemp, (val) => _lastStreetTemp = val, _streetTempController, '°C');
@@ -212,15 +175,7 @@ class MqttService {
   }
 
   void _onConnected() => _statusController.add('✅ Подключено');
-  
-  void _onDisconnected() {
-    _statusController.add('❌ Связь потеряна');
-    print('⚠️ Соединение разорвано. Попытка автоматического переподключения...');
-    Future.delayed(const Duration(seconds: 3), () {
-      reconnect();
-    });
-  } 
-  
+  void _onDisconnected() => _statusController.add('❌ Отключено');
   void _onSubscribed(String topic) => print('📡 Подписка: $topic');
 
   void dispose() {
