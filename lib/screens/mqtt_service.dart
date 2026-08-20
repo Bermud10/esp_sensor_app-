@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 
 // Модель данных для отображения
 class SensorReading {
@@ -27,6 +28,7 @@ class MqttService {
   double? _lastBalconyTemp;
   double? _lastRoomHumidity;
   double? _lastRoomPressure;
+  bool _isConnecting = false;
 
   // ⭐ Теперь потоки передают объекты SensorReading, а не просто String
   final _streetTempController = StreamController<SensorReading>.broadcast();
@@ -175,8 +177,34 @@ class MqttService {
   }
 
   void _onConnected() => _statusController.add('✅ Подключено');
-  void _onDisconnected() => _statusController.add('❌ Отключено');
   void _onSubscribed(String topic) => print('📡 Подписка: $topic');
+
+  Future<void> reconnect() async {
+    if (_isConnecting) return;
+    _isConnecting = true;
+    _statusController.add('Переподключение...');
+    
+    if (_client != null && _client!.connectionStatus?.state == MqttConnectionState.connected) {
+      _client!.disconnect();
+    }
+    await Future.delayed(const Duration(seconds: 2));
+    await connect();
+    _isConnecting = false;
+  }
+
+  void appLifecycleChanged(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_client == null || _client!.connectionStatus?.state != MqttConnectionState.connected) {
+        reconnect();
+      }
+    }
+  }
+
+  void _onDisconnected() {
+    _statusController.add('❌ Отключено');
+    // Автоматическая попытка переподключения через 3 секунды
+    Future.delayed(const Duration(seconds: 3), () => reconnect());
+  }
 
   void dispose() {
     _client?.disconnect();
