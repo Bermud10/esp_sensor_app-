@@ -59,6 +59,28 @@ class _SensorDashboardState extends State<SensorDashboard> {
             ),
             const SizedBox(height: 20),
             
+            // Кнопка принудительного обновления
+            ElevatedButton.icon(
+              onPressed: () {
+                _mqttService.requestUpdate();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Запрос на обновление отправлен'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Обновить данные сейчас'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
             // Карточки датчиков
             Expanded(
               child: ListView(

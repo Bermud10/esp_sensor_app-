@@ -22,7 +22,6 @@ class SensorReading {
 class MqttService {
   MqttServerClient? _client;
 
-  // Переменные для хранения последних значений (чтобы считать разницу)
   double? _lastRoomTemp;
   double? _lastStreetTemp;
   double? _lastBalconyTemp;
@@ -30,7 +29,6 @@ class MqttService {
   double? _lastRoomPressure;
   bool _isConnecting = false;
 
-  // ⭐ Теперь потоки передают объекты SensorReading, а не просто String
   final _streetTempController = StreamController<SensorReading>.broadcast();
   final _balconyTempController = StreamController<SensorReading>.broadcast();
   final _roomTempController = StreamController<SensorReading>.broadcast();
@@ -72,7 +70,7 @@ class MqttService {
     }
 
     if (_client!.connectionStatus!.state == MqttConnectionState.connected) {
-      _statusController.add('✅ Подключено');
+      _statusController.add('Подключено');
       _client!.subscribe('user_1d18b030/#', MqttQos.atMostOnce);
 
       _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
@@ -176,7 +174,26 @@ class MqttService {
     }
   }
 
-  void _onConnected() => _statusController.add('✅ Подключено');
+  Future<void> requestUpdate() async {
+    if (_client == null || _client!.connectionStatus?.state != MqttConnectionState.connected) {
+      print('Нет подключения к брокеру');
+      _statusController.add('Нет подключения');
+      return;
+    }
+
+    final builder = MqttClientPayloadBuilder();
+    builder.addString('update'); // Команда для ESP
+
+    print('Отправка команды обновления...');
+    _client!.publishMessage(
+      'user_1d18b030/room/command', // Топик команды
+      MqttQos.atLeastOnce,
+      builder.payload!,
+    );
+    
+  }
+
+  void _onConnected() => _statusController.add('Подключено');
   void _onSubscribed(String topic) => print('📡 Подписка: $topic');
 
   Future<void> reconnect() async {
@@ -201,7 +218,7 @@ class MqttService {
   }
 
   void _onDisconnected() {
-    _statusController.add('❌ Отключено');
+    _statusController.add('Отключено');
     // Автоматическая попытка переподключения через 3 секунды
     Future.delayed(const Duration(seconds: 3), () => reconnect());
   }
