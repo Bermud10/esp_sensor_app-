@@ -45,9 +45,9 @@ class _SensorDashboardState extends State<SensorDashboard> {
                 return Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: status.contains('✅') ? Colors.green.shade50 : Colors.red.shade50,
+                    color: status.contains('Подключено') ? Colors.green.shade50 : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: status.contains('✅') ? Colors.green : Colors.red),
+                    border: Border.all(color: status.contains('Подключено') ? Colors.green : Colors.red),
                   ),
                   child: Text(
                     'Статус сети: $status',
@@ -71,7 +71,7 @@ class _SensorDashboardState extends State<SensorDashboard> {
                 );
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Обновить данные сейчас'),
+              label: const Text('Обновить'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -85,15 +85,15 @@ class _SensorDashboardState extends State<SensorDashboard> {
             Expanded(
               child: ListView(
                 children: [
-                  // _buildSensorCard('Улица', _mqttService.streetTempStream, Icons.ac_unit, Colors.blue),
+                  // _buildSensorCard('Улица', _mqttService.streetTempStream, Colors.blue),
                   // const SizedBox(height: 12),
-                  // _buildSensorCard('Балкон', _mqttService.balconyTempStream, Icons.balcony, Colors.cyan),
+                  // _buildSensorCard('Балкон', _mqttService.balconyTempStream, Colors.cyan),
                   const SizedBox(height: 12),
-                  _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream, Icons.home, Colors.orange),
+                  _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream,  Colors.orange),
                   const SizedBox(height: 12),
-                  _buildSensorCard('Комната (Влажность)', _mqttService.roomHumidityStream, Icons.water_drop, Colors.teal),
+                  _buildSensorCard('Комната (Влажность)', _mqttService.roomHumidityStream,  Colors.teal),
                   const SizedBox(height: 12),
-                  _buildSensorCard('Комната (Давление)', _mqttService.roomPressureStream, Icons.compress, Colors.purple),
+                  _buildSensorCard('Комната (Давление)', _mqttService.roomPressureStream,  Colors.purple),
                 ],
               ),
             ),
@@ -103,7 +103,7 @@ class _SensorDashboardState extends State<SensorDashboard> {
     );
   }
 
-  Widget _buildSensorCard(String title, Stream<SensorReading> dataStream, IconData icon, Color color) {
+  Widget _buildSensorCard(String title, Stream<SensorReading> dataStream, Color color) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -143,7 +143,6 @@ class _SensorDashboardState extends State<SensorDashboard> {
 
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            leading: Icon(icon, size: 40, color: color),
             title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,12 +152,10 @@ class _SensorDashboardState extends State<SensorDashboard> {
                 diffWidget,
               ],
                const SizedBox(height: 4),
-              // ⭐ Показываем время измерения
               Text(
                 'Измерено: $timeStr',
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              // ⭐ Показываем "возраст" данных
               Builder(
                 builder: (context) {
                   final age = DateTime.now().difference(data.timestamp);
@@ -173,7 +170,7 @@ class _SensorDashboardState extends State<SensorDashboard> {
                   
                   final isStale = age.inMinutes > 5;
                   return Text(
-                    '🕐 $ageText',
+                    '$ageText',
                     style: TextStyle(
                       fontSize: 12, 
                       color: isStale ? Colors.red : Colors.green,
