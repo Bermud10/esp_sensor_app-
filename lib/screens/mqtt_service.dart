@@ -111,10 +111,30 @@ class MqttService {
       ));
     }
 
-    if (topic == 'user_1d18b030/street/temp') {
-      processNumericData(_lastStreetTemp, (val) => _lastStreetTemp = val, _streetTempController, '°C');
-    } else if (topic == 'user_1d18b030/balcony/temp') {
-      processNumericData(_lastBalconyTemp, (val) => _lastBalconyTemp = val, _balconyTempController, '°C');
+    if (topic == 'user_1d18b030/street/data') {
+      try {
+        final data = jsonDecode(payload);
+        final measurementTime = DateTime.fromMillisecondsSinceEpoch((data['ts'] as int) * 1000, isUtc: true).toLocal();
+
+        
+        void updateStreetMetric(double newVal, double? lastVal, Function(double?) setLast, StreamController<SensorReading> ctrl, String unit) {
+          double? diff = lastVal != null ? newVal - lastVal : null;
+          setLast(newVal);
+          ctrl.add(SensorReading(
+            displayValue: '${newVal.toStringAsFixed(1)} $unit',
+            timestamp: measurementTime,
+            difference: diff?.abs(),
+            isIncreasing: diff != null ? diff >= 0 : true,
+          ));
+        }
+
+        updateStreetMetric(data['street_temp'].toDouble(), _lastStreetTemp, (v) => _lastStreetTemp = v, _streetTempController, '°C');
+        updateStreetMetric(data['balcony_temp'].toDouble(), _lastBalconyTemp, (v) => _lastBalconyTemp = v, _balconyTempController, '°C');
+
+        print('📩 Получены данные улицы: ${data['street_temp']}°C, балкон: ${data['balcony_temp']}°C');
+      } catch (e) {
+        print('⚠️ Ошибка парсинга JSON улицы: $e');
+      }
     } else if (topic == 'user_1d18b030/room/data') {
       try {
         final data = jsonDecode(payload);

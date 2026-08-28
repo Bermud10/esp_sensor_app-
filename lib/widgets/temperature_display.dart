@@ -85,15 +85,16 @@ class _SensorDashboardState extends State<SensorDashboard> {
             Expanded(
               child: ListView(
                 children: [
-                  // _buildSensorCard('Улица', _mqttService.streetTempStream, Colors.blue),
-                  // const SizedBox(height: 12),
-                  // _buildSensorCard('Балкон', _mqttService.balconyTempStream, Colors.cyan),
-                  const SizedBox(height: 12),
                   _buildSensorCard('Комната (Темп.)', _mqttService.roomTempStream,  Colors.orange),
                   const SizedBox(height: 12),
                   _buildSensorCard('Комната (Влажность)', _mqttService.roomHumidityStream,  Colors.teal),
                   const SizedBox(height: 12),
                   _buildSensorCard('Комната (Давление)', _mqttService.roomPressureStream,  Colors.purple),
+                  const SizedBox(height: 12),
+                   _buildSensorCard('Улица', _mqttService.streetTempStream, Colors.blue),
+                  const SizedBox(height: 12),
+                  _buildSensorCard('Балкон', _mqttService.balconyTempStream, Colors.cyan),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
