@@ -39,6 +39,11 @@ android {
     }
 }
 
+dependencies {
+    // MQTT клиент для Android (библиотека Eclipse Paho)
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+}
+
 flutter {
     source = "../.."
 }
