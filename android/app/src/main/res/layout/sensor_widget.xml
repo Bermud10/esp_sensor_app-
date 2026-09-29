@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="12dp"
-    android:background="@android:color/white">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="6dp"
+    android:background="#B3808080">
 
     <ViewFlipper
         android:id="@+id/viewFlipper"
@@ -12,17 +12,18 @@
 
         <!-- Экран 1: Комната -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🏠 Комната"
+                android:text="Комната"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="#FFFFFF"
                 android:layout_marginBottom="8dp" />
 
             <TextView
@@ -31,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:text="25.6 °C"
                 android:textSize="32sp"
-                android:textColor="#FF5722"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
             <TextView
@@ -40,6 +41,7 @@
                 android:layout_height="wrap_content"
                 android:text="48.0 %"
                 android:textSize="20sp"
+                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp" />
 
             <TextView
@@ -48,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:text="14:30"
                 android:textSize="14sp"
-                android:textColor="#888888"
+                android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp" />
 
             <LinearLayout
@@ -64,6 +66,8 @@
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_media_next"
                     android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:contentDescription="Следующий экран" />
 
                 <ImageButton
@@ -73,24 +77,26 @@
                     android:src="@android:drawable/ic_popup_sync"
                     android:background="?android:attr/selectableItemBackground"
                     android:contentDescription="Обновить"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_gravity="center"
                     android:layout_marginStart="16dp" />
             </LinearLayout>
         </LinearLayout>
 
         <!-- Экран 2: Улица и Балкон -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="start">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🌍 Улица и Балкон"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:text="Улица"
+                android:textSize="14sp"
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:id="@+id/temp_street"
@@ -98,15 +104,15 @@
                 android:layout_height="wrap_content"
                 android:text="15.2 °C"
                 android:textSize="28sp"
-                android:textColor="#2196F3"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Улица"
+                android:text="Балкон"
                 android:textSize="14sp"
-                android:textColor="#888888" />
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:id="@+id/temp_balcony"
@@ -114,16 +120,11 @@
                 android:layout_height="wrap_content"
                 android:text="18.5 °C"
                 android:textSize="28sp"
-                android:textColor="#4CAF50"
                 android:textStyle="bold"
+                android:textColor="#FFFFFF"
                 android:layout_marginTop="8dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Балкон"
-                android:textSize="14sp"
-                android:textColor="#888888" />
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -138,6 +139,8 @@
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_media_previous"
                     android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:contentDescription="Предыдущий экран" />
 
                 <ImageButton
@@ -146,6 +149,8 @@
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_popup_sync"
                     android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:contentDescription="Обновить"
                     android:layout_marginStart="16dp" />
             </LinearLayout>
