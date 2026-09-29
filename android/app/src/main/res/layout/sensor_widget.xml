@@ -2,8 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="6dp"
-    android:background="#B3808080">
+    android:padding="8dp"
+    android:background="#B3202020">
 
     <ViewFlipper
         android:id="@+id/viewFlipper"
@@ -15,23 +15,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="start">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Комната"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="8dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Комната"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:id="@+id/btn_refresh_room"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@android:drawable/ic_popup_sync"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Обновить"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/temp_room"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="25.6 °C"
-                android:textSize="32sp"
+                android:text="25.6°C"
+                android:textSize="25sp"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
@@ -39,8 +56,8 @@
                 android:id="@+id/humidity_room"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="48.0 %"
-                android:textSize="20sp"
+                android:text="48.0%"
+                android:textSize="25sp"
                 android:textColor="#FFFFFF"
                 android:layout_marginTop="4dp" />
 
@@ -69,18 +86,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:contentDescription="Следующий экран" />
-
-                <ImageButton
-                    android:id="@+id/btn_refresh_room"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@android:drawable/ic_popup_sync"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:contentDescription="Обновить"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="16dp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -88,71 +93,78 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="start">
+            android:gravity="start"
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Улица"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Улица"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:id="@+id/btn_refresh_outside"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@android:drawable/ic_popup_sync"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Обновить"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/temp_street"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15.2 °C"
-                android:textSize="28sp"
+                android:text="15.2°C"
                 android:textColor="#FFFFFF"
+                android:textSize="25sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Балкон"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/temp_balcony"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="18.5 °C"
-                android:textSize="28sp"
-                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:text="18.5°C"
                 android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp" />
-
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:layout_marginTop="12dp">
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/btn_prev"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@android:drawable/ic_media_previous"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:contentDescription="Предыдущий экран"
                     android:focusable="true"
-                    android:contentDescription="Предыдущий экран" />
-
-                <ImageButton
-                    android:id="@+id/btn_refresh_outside"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@android:drawable/ic_popup_sync"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="Обновить"
-                    android:layout_marginStart="16dp" />
+                    android:src="@android:drawable/ic_media_previous" />
             </LinearLayout>
         </LinearLayout>
     </ViewFlipper>
