@@ -31,16 +31,30 @@
                     android:textColor="#FFFFFF"
                     android:textSize="14sp" />
 
-                <ImageButton
-                    android:id="@+id/btn_refresh_room"
+                <!-- ⭐ Контейнер для кнопки и анимации загрузки -->
+                <FrameLayout
                     android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@android:drawable/ic_popup_sync"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Обновить"
-                    android:clickable="true"
-                    android:focusable="true" />
+                    android:layout_height="18dp">
+
+                    <ImageButton
+                        android:id="@+id/btn_refresh_room"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@android:drawable/ic_popup_sync"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="Обновить"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_room"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:indeterminate="true"
+                        android:visibility="gone" /> <!-- Скрыт по умолчанию -->
+                </FrameLayout>
             </LinearLayout>
 
             <TextView
@@ -110,16 +124,30 @@
                     android:textColor="#FFFFFF"
                     android:textSize="14sp" />
 
-                <ImageButton
-                    android:id="@+id/btn_refresh_outside"
+                <!-- ⭐ Контейнер для кнопки и анимации загрузки -->
+                <FrameLayout
                     android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@android:drawable/ic_popup_sync"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Обновить"
-                    android:scaleType="fitCenter"
-                    android:clickable="true"
-                    android:focusable="true" />
+                    android:layout_height="18dp">
+
+                    <ImageButton
+                        android:id="@+id/btn_refresh_outside"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@android:drawable/ic_popup_sync"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Обновить"
+                        android:scaleType="fitCenter"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_outside"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:indeterminate="true"
+                        android:visibility="gone" /> <!-- Скрыт по умолчанию -->
+                </FrameLayout>
             </LinearLayout>
 
             <TextView
@@ -147,7 +175,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
                 android:textStyle="bold" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
