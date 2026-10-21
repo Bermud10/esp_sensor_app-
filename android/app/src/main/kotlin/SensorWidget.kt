@@ -1,5 +1,6 @@
 package com.example.esp_sensor_app
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -49,13 +50,53 @@ class SensorWidget : AppWidgetProvider() {
 
         when (intent.action) {
             ACTION_TOGGLE -> {
-                Log.d(TAG, "🔄 Тап по виджету: переключение экрана")
                 val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val currentPage = prefs.getInt(KEY_CURRENT_PAGE, 0)
-                // Переключаем: если 0, то станет 1. Если 1, то станет 0.
-                prefs.edit().putInt(KEY_CURRENT_PAGE, if (currentPage == 0) 1 else 0).apply()
-                updateAllWidgets(context, isLoading = false)
+                val now = System.currentTimeMillis()
+                val lastTap = prefs.getLong("last_tap_time", 0)
+                var tapCount = prefs.getInt("tap_count", 0)
+
+                // Если прошло меньше 600 мс с последнего нажатия, увеличиваем счетчик
+                if (now - lastTap < 450) {
+                    tapCount++
+                } else {
+                    tapCount = 1 // Сброс, если пауза была долгой
+                }
+
+                // Сохраняем новое состояние
+                prefs.edit()
+                    .putLong("last_tap_time", now)
+                    .putInt("tap_count", tapCount)
+                    .apply()
+
+                if (tapCount == 3) {
+                    Log.d(TAG, "🚀 Тройное нажатие: Открываем приложение!")
+
+                    // Сбрасываем счетчик
+                    prefs.edit().putInt("tap_count", 0).apply()
+
+                    // Формируем Intent для запуска приложения
+                    val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    if (launchIntent != null) {
+                        // ⭐ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Правильная комбинация флагов
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) // Поднимает приложение, если оно уже в фоне, вместо создания копии
+
+                        try {
+                            context.startActivity(launchIntent)
+                            Log.d(TAG, "✅ Команда на запуск приложения успешно отправлена")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "❌ Система заблокировала запуск (строгие настройки батареи): ${e.message}")
+                        }
+                    }
+                } else {
+                    // Обычное переключение экрана (1-й или 2-й тап)
+                    Log.d(TAG, "🔄 Тап $tapCount: Переключение экрана")
+                    val currentPage = prefs.getInt(KEY_CURRENT_PAGE, 0)
+                    prefs.edit().putInt(KEY_CURRENT_PAGE, if (currentPage == 0) 1 else 0).apply()
+                    updateAllWidgets(context, isLoading = false)
+                }
             }
+
             ACTION_REFRESH -> {
                 Log.d(TAG, "🔴 Нажата кнопка обновления!")
                 updateAllWidgets(context, isLoading = true)
