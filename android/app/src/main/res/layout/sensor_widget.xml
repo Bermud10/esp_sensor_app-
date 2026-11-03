@@ -6,7 +6,6 @@
     android:background="#B3202020">
 
     <!-- ========== ЭКРАН 1: КОМНАТА ========== -->
-    <!-- android:id добавлен, чтобы ловить тап по всему экрану -->
     <LinearLayout
         android:id="@+id/screen_room"
         android:layout_width="match_parent"
@@ -65,38 +64,35 @@
             </FrameLayout>
         </LinearLayout>
 
-        <!-- Строка 2: Температура -->
-        <TextView
-            android:id="@+id/temp_room"
-            android:layout_width="wrap_content"
+        <!-- Строка 2: Температура и Влажность (вместе) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="25.6°C"
-            android:textSize="28sp"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:layout_marginTop="2dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
 
-        <!-- Строка 3: Надпись "Влажность" -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Влажность"
-            android:textColor="#BDBDBD"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/temp_room"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25.6°C"
+                android:textSize="28sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
 
-        <!-- Строка 4: Данные влажности -->
-        <TextView
-            android:id="@+id/humidity_room"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="48.0%"
-            android:textSize="18sp"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:id="@+id/humidity_room"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  48.0%"
+                android:textSize="20sp"
+                android:textColor="#E0E0E0"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- ========== ЭКРАН 2: УЛИЦА / БАЛКОН ========== -->
-    <!-- android:id добавлен, чтобы ловить тап по всему экрану -->
     <LinearLayout
         android:id="@+id/screen_outside"
         android:layout_width="match_parent"
@@ -114,7 +110,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Улица"
+                android:text="Улица/Балкон"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -155,36 +151,32 @@
             </FrameLayout>
         </LinearLayout>
 
-        <!-- Температура улицы -->
-        <TextView
-            android:id="@+id/temp_street"
-            android:layout_width="wrap_content"
+        <!-- Строка 2: Температура улицы и балкона (вместе) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="15.2°C"
-            android:textSize="28sp"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:layout_marginTop="2dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
 
-        <!-- Надпись "Балкон" -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Балкон"
-            android:textColor="#BDBDBD"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/temp_street"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15.2°C"
+                android:textSize="28sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
 
-        <!-- Температура балкона -->
-        <TextView
-            android:id="@+id/temp_balcony"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="18.5°C"
-            android:textSize="18sp"
-            android:textColor="#FFFFFF" />
-
-        <!-- Кнопки перехода УБРАНЫ -->
+            <TextView
+                android:id="@+id/temp_balcony"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  18.5°C"
+                android:textSize="20sp"
+                android:textColor="#E0E0E0"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>
