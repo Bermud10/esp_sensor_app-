@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
+    android:padding="6dp"
     android:background="#B3202020">
 
     <!-- ========== ЭКРАН 1: КОМНАТА ========== -->
@@ -41,8 +41,8 @@
 
             <!-- Кнопка обновления с анимацией -->
             <FrameLayout
-                android:layout_width="18dp"
-                android:layout_height="18dp">
+                android:layout_width="20dp"
+                android:layout_height="20dp">
 
                 <ImageButton
                     android:id="@+id/btn_refresh_room"
@@ -93,8 +93,6 @@
             android:text="48.0%"
             android:textSize="18sp"
             android:textColor="#FFFFFF" />
-
-        <!-- Кнопки перехода УБРАНЫ -->
     </LinearLayout>
 
     <!-- ========== ЭКРАН 2: УЛИЦА / БАЛКОН ========== -->
@@ -133,8 +131,8 @@
 
             <!-- Кнопка обновления с анимацией -->
             <FrameLayout
-                android:layout_width="18dp"
-                android:layout_height="18dp">
+                android:layout_width="20dp"
+                android:layout_height="20dp">
 
                 <ImageButton
                     android:id="@+id/btn_refresh_outside"

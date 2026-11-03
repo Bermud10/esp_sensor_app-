@@ -43,6 +43,10 @@ class SensorWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId, isLoading = false)
         }
+
+        // ⭐ Автообновление: просто забираем данные с брокера
+        Log.d(TAG, "Сработал системный таймер (1 час). Забираем данные с брокера...")
+        fetchMqttData(context, forceUpdate = false)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -100,7 +104,7 @@ class SensorWidget : AppWidgetProvider() {
             ACTION_REFRESH -> {
                 Log.d(TAG, "🔴 Нажата кнопка обновления!")
                 updateAllWidgets(context, isLoading = true)
-                fetchMqttData(context)
+                fetchMqttData(context, forceUpdate = true)
             }
         }
     }
@@ -168,12 +172,12 @@ class SensorWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun fetchMqttData(context: Context) {
+    private fun fetchMqttData(context: Context, forceUpdate: Boolean = false) {
         CoroutineScope(Dispatchers.IO).launch {
             var client: MqttClient? = null
             try {
-                Log.d(TAG, "🟢 1. Вход в fetchMqttData")
-                val uniqueClientId = "widget_cmd_${System.currentTimeMillis()}"
+                Log.d(TAG, "🟢 1. Вход в fetchMqttData (forceUpdate=$forceUpdate)")
+                val uniqueClientId = "widget_${if (forceUpdate) "cmd" else "auto"}_${System.currentTimeMillis()}"
 
                 client = MqttClient(MQTT_BROKER, uniqueClientId, MemoryPersistence())
                 val options = MqttConnectOptions().apply {
@@ -198,7 +202,7 @@ class SensorWidget : AppWidgetProvider() {
 
                     override fun messageArrived(topic: String, message: MqttMessage) {
                         val payload = String(message.payload)
-                        Log.d(TAG, "📩 ПОЛУЧЕНЫ СВЕЖИЕ ДАННЫЕ: Топик=$topic")
+                        Log.d(TAG, "📩 ПОЛУЧЕНЫ ДАННЫЕ: Топик=$topic")
 
                         when (topic) {
                             TOPIC_ROOM -> {
@@ -233,22 +237,30 @@ class SensorWidget : AppWidgetProvider() {
                     override fun deliveryComplete(token: IMqttDeliveryToken?) {}
                 })
 
+                // Подписываемся на топики
                 client.subscribe(TOPIC_ROOM, 1)
                 client.subscribe(TOPIC_OUTSIDE, 1)
                 Log.d(TAG, "🟢 3. Подписки оформлены")
 
-                val cmdMessage = MqttMessage("update".toByteArray())
-                cmdMessage.qos = 1
+                // ⭐ Если forceUpdate=true, отправляем команды на платы
+                if (forceUpdate) {
+                    val cmdMessage = MqttMessage("update".toByteArray())
+                    cmdMessage.qos = 1
 
-                Log.d(TAG, "🟢 4. Отправка команды 'update' на платы...")
-                client.publish("user_1d18b030/room/command", cmdMessage)
-                client.publish("user_1d18b030/street/command", cmdMessage)
+                    Log.d(TAG, "🟢 4. Отправка команды 'update' на платы...")
+                    client.publish("user_1d18b030/room/command", cmdMessage)
+                    client.publish("user_1d18b030/street/command", cmdMessage)
 
-                Log.d(TAG, "🟢 5. Ожидание ответа от плат (до 6 сек)...")
-                var waitTime = 0
-                while (waitTime < 60 && (!roomUpdated || !streetUpdated)) {
-                    delay(100)
-                    waitTime++
+                    Log.d(TAG, "🟢 5. Ожидание ответа от плат (до 6 сек)...")
+                    var waitTime = 0
+                    while (waitTime < 60 && (!roomUpdated || !streetUpdated)) {
+                        delay(100)
+                        waitTime++
+                    }
+                } else {
+                    // ⭐ Если forceUpdate=false, просто ждём retained сообщения (2 секунды достаточно)
+                    Log.d(TAG, "🟢 4. Ожидание retained сообщений от брокера (2 сек)...")
+                    delay(2000)
                 }
 
                 Log.d(TAG, "🟢 6. Отключаемся от MQTT...")
